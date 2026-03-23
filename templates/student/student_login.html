@@ -1,0 +1,24 @@
+{% extends 'base_auth.html' %}
+{% block title %}Student Sign In — MentorMatch{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="auth-title">Student Sign In</div>
+  <div class="auth-sub">Enter your credentials to access your dashboard.</div>
+  <form method="post" autocomplete="on">
+    {% csrf_token %}
+    <div class="field-group">
+      <label class="field-label">Username</label>
+      <input type="text" name="username" class="input" autocomplete="username" autofocus required>
+    </div>
+    <div class="field-group" style="margin-bottom:1.5rem">
+      <label class="field-label">Password</label>
+      <input type="password" name="password" class="input" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Sign In</button>
+  </form>
+  <div class="divider"></div>
+  <p style="font-size:.75rem;color:var(--text-secondary);text-align:center">
+    No account? <a href="{% url 'student_register' %}" style="color:var(--violet-light);font-weight:600">Register here</a>
+  </p>
+</div>
+{% endblock %}

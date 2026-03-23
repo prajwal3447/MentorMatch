@@ -1,0 +1,29 @@
+{% extends 'base_auth.html' %}
+{% block title %}Register — MentorMatch{% endblock %}
+{% block content %}
+<div class="auth-card" style="max-width:460px">
+  <div class="auth-title">Create Account</div>
+  <div class="auth-sub">Fill in your details. You'll set up your project after registration.</div>
+  {% if form.non_field_errors %}
+    <div class="alert alert-error" style="margin-bottom:1rem">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <form method="post" autocomplete="off">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field-group">
+        <label class="field-label" for="{{ field.id_for_label }}">
+          {{ field.label }}{% if field.field.required %} <span style="color:var(--danger)">*</span>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}<div class="field-hint">{{ field.help_text }}</div>{% endif %}
+        {% if field.errors %}<div class="field-error">{{ field.errors|join:", " }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem">Create Account</button>
+  </form>
+  <div class="divider"></div>
+  <p style="font-size:.75rem;color:var(--text-secondary);text-align:center">
+    Already registered? <a href="{% url 'student_login' %}" style="color:var(--violet-light);font-weight:600">Sign in</a>
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block title %}Guide Dashboard — MentorMatch{% endblock %}
+{% block page_title %}Guide Dashboard{% endblock %}
+{% block gnav_dashboard %}active{% endblock %}
+{% block nav_guide_dash %}active{% endblock %}
+
+{% block page_actions %}
+  <a href="{% url 'guide_edit_profile' %}" class="btn btn-secondary btn-sm">Edit Profile</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon">👨‍🏫</div>
+    <div class="stat-label">Guide</div>
+    <div class="stat-value" style="font-size:1rem;line-height:1.3">{{ guide.name }}</div>
+    <div class="stat-sub">{{ guide.department }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📁</div>
+    <div class="stat-label">Assigned Groups</div>
+    <div class="stat-value">{{ assigned_groups.count }}</div>
+    <div class="stat-sub">of {{ guide.max_groups }} max</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🔓</div>
+    <div class="stat-label">Open Slots</div>
+    <div class="stat-value" style="color:{% if remaining_slots == 0 %}var(--danger){% elif remaining_slots <= 2 %}var(--warning){% else %}var(--success){% endif %}">
+      {{ remaining_slots }}
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📊</div>
+    <div class="stat-label">Workload</div>
+    <div style="margin-top:.625rem">
+      <div class="load-bar" style="margin-bottom:.5rem">
+        <div class="load-fill {% if load_percentage >= 90 %}load-high{% elif load_percentage >= 60 %}load-medium{% else %}load-low{% endif %}"
+             style="width:{{ load_percentage }}%"></div>
+      </div>
+      <div style="font-size:.75rem;color:var(--text-secondary)">{{ load_percentage }}% capacity</div>
+    </div>
+  </div>
+</div>
+
+<!-- Info row -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header"><span class="card-title">Specializations</span></div>
+    <div class="card-body" style="display:flex;flex-wrap:wrap;gap:.4rem;padding:.875rem 1.25rem">
+      {% for s in guide.specializations.all %}
+        <span class="badge badge-group">{{ s.name }}</span>
+      {% empty %}
+        <span style="font-size:.8rem;color:var(--text-muted)">No specializations set.</span>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0">
+    <div class="card-header"><span class="card-title">Contact</span></div>
+    <div class="card-body" style="font-size:.825rem;color:var(--text-secondary);padding:.875rem 1.25rem;display:flex;flex-direction:column;gap:.35rem">
+      <span>{{ guide.email|default:"No email set" }}</span>
+      <span>{{ guide.phone|default:"No phone set" }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Pending groups -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Pending Groups</span>
+    {% if pending_groups %}<span style="font-size:.72rem;color:var(--text-muted)">{{ pending_groups|length }} waiting</span>{% endif %}
+  </div>
+  {% if pending_groups %}
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Type</th>
+            <th>Domain</th>
+            <th>Dept</th>
+            <th>Members</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for group in pending_groups %}
+          <tr>
+            <td style="font-weight:600;color:var(--text-primary)">{{ group.project_title }}</td>
+            <td><span class="badge {% if group.is_solo %}badge-solo{% else %}badge-group{% endif %}">{% if group.is_solo %}Solo{% else %}Group{% endif %}</span></td>
+            <td>{{ group.project_domain }}</td>
+            <td>{{ group.department.code }}</td>
+            <td style="font-size:.75rem">{% for m in group.memberships.all %}{{ m.student.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td>
+              <div style="display:flex;gap:.375rem;justify-content:flex-end">
+                <form method="post" action="{% url 'accept_group' group.id %}" style="margin:0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success btn-xs">Accept</button>
+                </form>
+                <form method="post" action="{% url 'reject_group' group.id %}" style="margin:0">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-xs"
+                          onclick="return confirm('Return this group to pending?')">Reject</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">No pending groups at the moment.</div>
+  {% endif %}
+</div>
+
+<!-- Assigned groups -->
+<div class="section-label" style="margin-top:1.5rem">Assigned Groups ({{ assigned_groups.count }})</div>
+
+{% if assigned_groups %}
+  {% for group in assigned_groups %}
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <span class="card-title">{{ group.project_title }}</span>
+          <span style="font-size:.72rem;color:var(--text-muted);margin-left:.75rem">{{ group.department.code }} · {{ group.project_domain }}</span>
+        </div>
+        <span class="badge {% if group.is_solo %}badge-solo{% else %}badge-group{% endif %}">
+          {% if group.is_solo %}Solo{% else %}Group · {{ group.member_count }}{% endif %}
+        </span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border-light)">
+
+        <!-- Members -->
+        <div style="padding:1rem 1.25rem;border-right:1px solid var(--border-light)">
+          <div class="section-label">Members</div>
+          {% for m in group.memberships.all %}
+            <div class="member-row" style="padding:.45rem 0">
+              <div>
+                <span style="font-size:.8rem;font-weight:600;color:var(--text-primary)">{{ m.student.name }}</span>
+                <span style="font-family:monospace;font-size:.68rem;color:var(--text-muted);margin-left:.4rem">{{ m.student.roll_number }}</span>
+              </div>
+              <span class="badge {% if m.role == 'LEADER' %}badge-leader{% else %}badge-solo{% endif %}" style="font-size:.62rem">{{ m.role }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Submissions -->
+        <div style="padding:1rem 1.25rem;border-right:1px solid var(--border-light)">
+          <div class="section-label">Submissions</div>
+          {% with sub=group.submission %}
+            {% if sub %}
+              <div class="file-slot" style="margin-bottom:.4rem">
+                <span class="file-slot-label" style="font-size:.75rem">Presentation</span>
+                {% if sub.presentation %}<a href="{{ sub.presentation.url }}" target="_blank" class="btn btn-xs btn-secondary">View</a>
+                {% else %}<span class="file-slot-status">—</span>{% endif %}
+              </div>
+              <div class="file-slot" style="margin-bottom:.4rem">
+                <span class="file-slot-label" style="font-size:.75rem">Report</span>
+                {% if sub.report %}<a href="{{ sub.report.url }}" target="_blank" class="btn btn-xs btn-secondary">View</a>
+                {% else %}<span class="file-slot-status">—</span>{% endif %}
+              </div>
+              <div class="file-slot">
+                <span class="file-slot-label" style="font-size:.75rem">Screenshot</span>
+                {% if sub.screenshot %}<a href="{{ sub.screenshot.url }}" target="_blank" class="btn btn-xs btn-secondary">View</a>
+                {% else %}<span class="file-slot-status">—</span>{% endif %}
+              </div>
+            {% else %}
+              <div style="font-size:.78rem;color:var(--text-muted);padding:.5rem 0">No files uploaded yet.</div>
+            {% endif %}
+          {% endwith %}
+        </div>
+
+        <!-- Tasks -->
+        <div style="padding:1rem 1.25rem">
+          <div class="section-label">Tasks</div>
+          {% with todos=group.todos.all %}
+            {% if todos %}
+              {% for todo in todos %}
+                <div class="todo-item {% if todo.is_done %}todo-done{% endif %}" style="padding:.4rem 0">
+                  <div style="flex:1">
+                    <div class="todo-title" style="font-size:.78rem;font-weight:600;color:var(--text-primary)">{{ todo.title }}</div>
+                    {% if todo.is_done and todo.marked_done_by %}
+                      <div style="font-size:.68rem;color:var(--success)">✓ {{ todo.marked_done_by.name }}</div>
+                    {% endif %}
+                  </div>
+                  <div style="display:flex;gap:.3rem;flex-shrink:0">
+                    <button class="btn btn-ghost btn-xs" onclick="openModal('modal-{{ todo.id|slugify }}')">Edit</button>
+                    <form method="post" action="{% url 'delete_todo' group.id todo.id %}" style="margin:0">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-xs" data-no-spinner
+                              onclick="return confirm('Delete this task?')">✕</button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div style="font-size:.78rem;color:var(--text-muted);padding:.5rem 0">No tasks yet.</div>
+            {% endif %}
+          {% endwith %}
+
+          <form method="post" action="{% url 'add_todo' group.id %}" style="margin-top:.75rem">
+            {% csrf_token %}
+            <input type="text" name="title" class="input" placeholder="New task..." required
+                   style="font-size:.78rem;padding:.4rem .7rem;margin-bottom:.4rem">
+            <textarea name="description" class="input" placeholder="Description (optional)" rows="2"
+                      style="font-size:.75rem;padding:.4rem .7rem;resize:none"></textarea>
+            <button type="submit" class="btn btn-primary btn-xs" style="width:100%;justify-content:center;margin-top:.4rem">
+              Add Task
+            </button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Edit todo modals -->
+      {% for todo in group.todos.all %}
+        <div class="modal-backdrop" id="modal-{{ todo.id|slugify }}">
+          <div class="modal-box">
+            <div class="modal-title">Edit Task</div>
+            <form method="post" action="{% url 'edit_todo' group.id todo.id %}">
+              {% csrf_token %}
+              <div class="field-group">
+                <label class="field-label">Title</label>
+                <input type="text" name="title" value="{{ todo.title }}" class="input" required>
+              </div>
+              <div class="field-group">
+                <label class="field-label">Description</label>
+                <textarea name="description" class="input" rows="3">{{ todo.description }}</textarea>
+              </div>
+              <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modal-{{ todo.id|slugify }}')">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">No groups assigned yet. Accept a pending group to get started.</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.add('open');
+}
+function closeModal(id) {
+  const m = document.getElementById(id);
+  if (m) m.classList.remove('open');
+}
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+```
+<h2 class="mb-4">Student Dashboard</h2>
+
+<div class="card shadow p-4">
+
+    <p><b>Name:</b> {{ student.name }}</p>
+
+    <p><b>Roll Number:</b> {{ student.roll_number }}</p>
+
+    <p><b>Department:</b> {{ student.department }}</p>
+
+    <p><b>Project Title:</b> {{ student.project_title }}</p>
+
+    <p><b>Project Domain:</b> {{ student.project_domain }}</p>
+
+    <p><b>Status:</b>
+    {% if student.status == "ASSIGNED" %}
+        <span style="color:green; font-weight:bold;">Guide Assigned</span>
+    {% else %}
+        <span style="color:orange; font-weight:bold;">Pending</span>
+    {% endif %}
+    </p>
+
+    <p><b>Assigned Guide info:</b>
+    {% if student.guide %}
+        <p><strong>Guide Name:</strong> {{ student.guide.name }}</p>
+        <p><strong>Guide Phone:</strong> {{ student.guide.phone }}</p>
+        <p><strong>Guide Email:</strong> {{ student.guide.email }}</p>
+       
+    {% else %}
+        <p><strong>Status:</strong> Waiting for guide allocation</p>
+    {% endif %}
+    </p>
+
+</div>
+```
+
+</div>
+
+{% endblock %}

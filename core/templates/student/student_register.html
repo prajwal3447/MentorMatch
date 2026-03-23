@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Student Registration</h2>
+
+{% if form.errors %}
+<div class="alert alert-danger">
+{{ form.errors }}
+</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">Register</button>
+</form>
+
+{% endblock %}

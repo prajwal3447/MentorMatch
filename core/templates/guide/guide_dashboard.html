@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h5>Guide Workload</h5>
+
+<p>
+<strong>{{ assigned_students.count }} / {{ guide.max_students }}</strong> Students Assigned
+</p>
+<div class="progress mb-4" style="height:25px;">
+
+    {% if load_percentage < 50 %}
+        <div class="progress-bar bg-success" role="progressbar" style="width: {{ load_percentage }}%;">
+    {% elif load_percentage < 80 %}
+        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ load_percentage }}%;">
+    {% else %}
+        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ load_percentage }}%;">
+    {% endif %}
+
+        {{ assigned_students.count }}/{{ guide.max_students }}
+
+    </div>
+
+</div>
+
+<div class="container mt-4">
+
+<h2 class="mb-4">Guide Dashboard</h2>
+
+<div class="card p-3 mb-4">
+
+<p><b>Guide Name:</b> {{ guide.name }}</p>
+
+<p><b>Maximum Students:</b> {{ guide.max_students }}</p>
+
+<p><b>Remaining Slots:</b> {{ remaining_slots }}</p>
+
+</div>
+
+<!-- Pending Students -->
+<h3>Pending Students (Manual Allocation)</h3>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Student Name</th>
+<th>Roll Number</th>
+<th>Department</th>
+<th>Project Title</th>
+<th>Action</th>
+</tr>
+
+{% for student in students %}
+
+<tr>
+<td>{{ student.name }}</td>
+<td>{{ student.roll_number }}</td>
+<td>{{ student.department }}</td>
+<td>{{ student.project_title }}</td>
+<td>{{ student.phone }}</td>
+<td>{{ student.email }}</td>
+<td>
+<a href="{% url 'accept_student' student.id %}" class="btn btn-success btn-sm">
+Accept
+</a>
+
+<a href="{% url 'reject_student' student.id %}" class="btn btn-danger btn-sm">
+Reject
+</a>
+</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="5">No pending students</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+
+<!-- Assigned Students -->
+<h3 class="mt-5">Students Assigned To You</h3>
+
+<table class="table table-bordered">
+
+<tr>
+<th>Name</th>
+<th>Roll Number</th>
+<th>Project Title</th>
+</tr>
+
+{% for s in assigned_students %}
+
+<tr>
+<td>{{ s.name }}</td>
+<td>{{ s.roll_number }}</td>
+<td>{{ s.project_title }}</td>
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="3">No students assigned yet</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+{% endblock %}

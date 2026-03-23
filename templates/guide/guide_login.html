@@ -1,0 +1,24 @@
+{% extends 'base_auth.html' %}
+{% block title %}Guide Sign In — MentorMatch{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="auth-title">Guide Sign In</div>
+  <div class="auth-sub">Guide accounts are created by the admin. Contact your administrator if you need access.</div>
+  <form method="post" autocomplete="on">
+    {% csrf_token %}
+    <div class="field-group">
+      <label class="field-label">Username</label>
+      <input type="text" name="username" class="input" autocomplete="username" autofocus required>
+    </div>
+    <div class="field-group" style="margin-bottom:1.5rem">
+      <label class="field-label">Password</label>
+      <input type="password" name="password" class="input" autocomplete="current-password" required>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Sign In</button>
+  </form>
+  <div class="divider"></div>
+  <p style="font-size:.75rem;color:var(--text-secondary);text-align:center">
+    <a href="{% url 'home' %}" style="color:var(--text-muted)">← Back to home</a>
+  </p>
+</div>
+{% endblock %}

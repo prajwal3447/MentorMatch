@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MentorMatch — NMIET{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="{% static 'css/mentormatch.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-orb bg-orb-1" aria-hidden="true"></div>
+<div class="bg-orb bg-orb-2" aria-hidden="true"></div>
+<div class="bg-orb bg-orb-3" aria-hidden="true"></div>
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- Toasts -->
+<div class="toast-wrap">
+  {% for message in messages %}
+    <div class="toast {% if message.tags == 'success' %}toast-success{% elif message.tags == 'error' %}toast-error{% elif message.tags == 'warning' %}toast-warning{% endif %}">
+      <span class="toast-icon">{% if message.tags == 'success' %}✓{% elif message.tags == 'error' %}✕{% elif message.tags == 'warning' %}⚠{% else %}ℹ{% endif %}</span>
+      <span style="flex:1">{{ message }}</span>
+      <button onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;opacity:.5;font-size:.8rem;padding:0;line-height:1;margin-left:.5rem">✕</button>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- NMIET header -->
+<div class="inst-header">
+  <img src="{% static 'images/nmiet_header.png' %}" alt="NMIET — Nutan Maharashtra Institute of Engineering and Technology">
+</div>
+
+<!-- App chrome -->
+<div class="app-subbar">
+  <span class="app-subbar-brand">MentorMatch</span>
+  <nav class="app-subbar-nav">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'about' %}">About</a>
+  </nav>
+  <div class="app-subbar-right">
+    <a href="{% url 'student_login' %}" class="subbar-btn">Student Login</a>
+    <a href="{% url 'guide_login' %}"   class="subbar-btn">Guide Login</a>
+  </div>
+</div>
+
+<div class="auth-body">
+  {% block content %}{% endblock %}
+</div>
+
+<script>
+document.querySelectorAll('.toast').forEach(t => setTimeout(() => t.remove(), 5000));
+document.querySelectorAll('form').forEach(form => {
+  form.addEventListener('submit', function () {
+    const btn = this.querySelector('button[type=submit]:not([data-no-spinner])');
+    if (btn) { btn.disabled = true; btn.style.opacity = '.5'; }
+  });
+});
+
+// Particle field
+(function () {
+  const canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+  const COUNT = 45;
+  const COLORS = ['rgba(124,58,237,','rgba(139,92,246,','rgba(6,182,212,','rgba(167,139,250,'];
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  function rand(a,b) { return Math.random()*(b-a)+a; }
+  function spawn() {
+    return { x:rand(0,W), y:rand(0,H), r:rand(.4,1.6), vx:rand(-.18,.18), vy:rand(-.12,-.3),
+             life:rand(.3,1), fade:rand(.002,.004), col:COLORS[Math.floor(rand(0,COLORS.length))] };
+  }
+
+  function tick() {
+    ctx.clearRect(0,0,W,H);
+    for (let i=0; i<particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.life -= p.fade;
+      if (p.life<=0||p.y<-10||p.x<-10||p.x>W+10) { particles[i]=spawn(); particles[i].y=H+5; continue; }
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = p.col+p.life+')'; ctx.fill();
+    }
+    for (let i=0; i<particles.length; i++) {
+      for (let j=i+1; j<particles.length; j++) {
+        const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
+        const dist=Math.sqrt(dx*dx+dy*dy);
+        if (dist<110) {
+          ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y);
+          ctx.strokeStyle='rgba(124,58,237,'+(1-dist/110)*.055+')'; ctx.lineWidth=.5; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  particles = Array.from({length:COUNT}, spawn);
+  tick();
+})();
+</script>
+</body>
+</html>

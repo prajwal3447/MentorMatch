@@ -1,0 +1,359 @@
+{% extends 'base_auth.html' %}
+{% block title %}MentorMatch — NMIET Guide Allocation{% endblock %}
+
+{% block content %}
+<style>
+  .auth-body {
+    align-items: flex-start;
+    padding: 0;
+    background: var(--bg);
+    overflow-x: hidden;
+  }
+
+  /* Ambient orbs */
+  .home-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(90px); opacity: 0.13;
+    animation: orbDrift 18s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 600px; height: 600px; background: #7c3aed; top: -120px; left: -100px; animation-delay: 0s; }
+  .orb-2 { width: 420px; height: 420px; background: #38bdf8; top: 30%; right: -80px; animation-delay: -7s; }
+  .orb-3 { width: 350px; height: 350px; background: #a78bfa; bottom: -80px; left: 35%; animation-delay: -13s; }
+  @keyframes orbDrift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(30px,24px) scale(1.07); }
+  }
+
+  /* Grid overlay */
+  .home-grid {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+  }
+
+  /* ── Hero ── */
+  .home-wrap {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 1160px;
+    margin: 0 auto;
+    padding: 80px 40px 100px;
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.28);
+    border-radius: 100px; padding: 7px 20px;
+    font-size: 0.8rem; color: #a78bfa;
+    letter-spacing: 0.07em; text-transform: uppercase; font-weight: 600;
+    margin-bottom: 36px;
+    animation: fadeUp 0.55s ease both;
+  }
+  .badge-pip {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #a78bfa; box-shadow: 0 0 6px #a78bfa;
+    animation: pip 2s ease-in-out infinite;
+  }
+  @keyframes pip {
+    0%,100% { box-shadow: 0 0 6px #a78bfa; }
+    50%      { box-shadow: 0 0 14px #a78bfa; }
+  }
+
+  .hero-title {
+    font-size: clamp(2.8rem, 6vw, 5.2rem);
+    font-weight: 800; line-height: 1.08;
+    letter-spacing: -0.025em; text-align: center;
+    max-width: 860px; color: var(--text-primary);
+    animation: fadeUp 0.6s ease 0.08s both;
+  }
+  .hero-title .hl {
+    background: linear-gradient(130deg, #8b5cf6 0%, #38bdf8 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    margin-top: 22px;
+    font-size: 1.15rem; color: var(--text-secondary);
+    max-width: 580px; text-align: center; line-height: 1.7; font-weight: 400;
+    animation: fadeUp 0.65s ease 0.16s both;
+  }
+
+  /* ── SVG Graphic ── */
+  .hero-svg-wrap {
+    width: min(820px, 94vw);
+    margin: 60px auto 24px;
+    animation: fadeUp 0.7s ease 0.24s both;
+  }
+
+  /* ── Section label ── */
+  .role-label {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.13em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 36px; text-align: center;
+    animation: fadeUp 0.6s ease 0.32s both;
+  }
+
+  /* ── Role cards ── */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px; width: 100%;
+    animation: fadeUp 0.65s ease 0.38s both;
+  }
+
+  .role-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 36px 32px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    cursor: default;
+  }
+  .role-card::before {
+    content: ''; position: absolute; inset: 0;
+    opacity: 0; transition: opacity 0.25s; border-radius: inherit;
+  }
+  .role-card:hover { transform: translateY(-5px); }
+  .role-card:hover::before { opacity: 1; }
+
+  .rc-student::before { background: radial-gradient(ellipse at top left, rgba(96,165,250,0.08), transparent 60%); }
+  .rc-student:hover   { border-color: rgba(96,165,250,0.35); box-shadow: 0 16px 48px rgba(96,165,250,0.1); }
+
+  .rc-guide  { border-color: rgba(124,58,237,0.25); box-shadow: 0 0 0 1px rgba(124,58,237,0.08); }
+  .rc-guide::before { background: radial-gradient(ellipse at top left, rgba(124,58,237,0.1), transparent 60%); }
+  .rc-guide:hover   { border-color: rgba(139,92,246,0.45); box-shadow: 0 16px 48px rgba(124,58,237,0.15); }
+
+  .rc-admin::before { background: radial-gradient(ellipse at top left, rgba(245,158,11,0.07), transparent 60%); }
+  .rc-admin:hover   { border-color: rgba(245,158,11,0.35); box-shadow: 0 16px 48px rgba(245,158,11,0.08); }
+
+  .rc-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; margin-bottom: 20px; position: relative; z-index: 1;
+  }
+  .ic-student { background: rgba(96,165,250,0.12); }
+  .ic-guide   { background: rgba(124,58,237,0.15); }
+  .ic-admin   { background: rgba(245,158,11,0.12); }
+
+  .rc-name {
+    font-size: 1.25rem; font-weight: 700; margin-bottom: 10px;
+    position: relative; z-index: 1;
+  }
+  .cn-student { color: #60a5fa; }
+  .cn-guide   { color: #a78bfa; }
+  .cn-admin   { color: #f59e0b; }
+
+  .rc-desc {
+    font-size: 0.95rem; color: var(--text-secondary);
+    line-height: 1.65; margin-bottom: 28px; flex: 1;
+    position: relative; z-index: 1;
+  }
+
+  .rc-actions { display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
+
+  .rc-btn {
+    display: block; width: 100%; padding: 14px 20px;
+    border-radius: 11px; font-size: 1rem; font-weight: 600;
+    text-align: center; text-decoration: none; cursor: pointer;
+    border: none; transition: all 0.18s; font-family: inherit;
+    letter-spacing: 0.01em;
+  }
+  .rb-student-solid { background: rgba(59,130,246,0.18); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .rb-student-solid:hover { background: rgba(59,130,246,0.28); color: #93c5fd; }
+  .rb-student-ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); }
+  .rb-student-ghost:hover { background: var(--surface-3); color: var(--text-primary); }
+
+  .rb-guide-solid { background: var(--violet); color: #fff; border: 1px solid var(--violet); box-shadow: 0 0 14px var(--violet-glow); }
+  .rb-guide-solid:hover { background: var(--violet-light); box-shadow: 0 0 22px rgba(124,58,237,0.45); color: #fff; }
+
+  .rb-admin-ghost { background: transparent; color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+  .rb-admin-ghost:hover { background: rgba(245,158,11,0.1); }
+
+  .featured-tag {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3);
+    color: #a78bfa; font-size: 0.62rem; padding: 2px 9px;
+    border-radius: 100px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 960px) {
+    .role-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 720px) {
+    .role-grid { grid-template-columns: 1fr; }
+    .hero-svg-wrap { display: none; }
+    .home-wrap { padding: 48px 20px 64px; }
+  }
+  @media (max-width: 480px) {
+    .hero-title { font-size: 2.2rem; }
+    .hero-sub { font-size: 1rem; }
+    .role-card { padding: 28px 24px; }
+    .rc-btn { padding: 12px 16px; font-size: 0.95rem; }
+  }
+</style>
+
+<div class="home-bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="home-grid"></div>
+
+<div class="home-wrap">
+
+  <div class="hero-badge">
+    <span class="badge-pip"></span>
+    Project Guide Allocation System
+  </div>
+
+  <h1 class="hero-title">
+    Connect Students with<br>
+    the <span class="hl">Right Mentors</span>
+  </h1>
+  <p class="hero-sub">
+    Guide allocation for final-year projects — match expertise, track progress, and streamline academic mentorship at NMIET.
+  </p>
+
+  <!-- Illustration -->
+  <div class="hero-svg-wrap">
+    <svg viewBox="0 0 660 260" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+      <defs>
+        <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#8b5cf6"/>
+          <stop offset="100%" stop-color="#60a5fa"/>
+        </linearGradient>
+        <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#38bdf8"/>
+          <stop offset="100%" stop-color="#7dd3fc"/>
+        </linearGradient>
+        <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="10"/>
+        </filter>
+        <marker id="mA" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="rgba(139,92,246,0.7)"/>
+        </marker>
+        <marker id="mB" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3 z" fill="rgba(56,189,248,0.7)"/>
+        </marker>
+      </defs>
+
+      <!-- glow -->
+      <ellipse cx="165" cy="130" rx="80" ry="60" fill="#7c3aed" opacity="0.07" filter="url(#soft)"/>
+      <ellipse cx="330" cy="130" rx="70" ry="55" fill="#a78bfa" opacity="0.05" filter="url(#soft)"/>
+      <ellipse cx="495" cy="130" rx="80" ry="60" fill="#38bdf8" opacity="0.07" filter="url(#soft)"/>
+
+      <!-- Student card -->
+      <rect x="50" y="80" width="152" height="100" rx="14" fill="rgba(13,20,36,0.85)" stroke="rgba(96,165,250,0.3)" stroke-width="1.2"/>
+      <circle cx="126" cy="106" r="12" fill="rgba(96,165,250,0.15)" stroke="url(#gA)" stroke-width="1.2"/>
+      <circle cx="126" cy="102" r="4.5" fill="#93c5fd"/>
+      <path d="M115 115 Q126 109 137 115" stroke="#93c5fd" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <rect x="114" y="122" width="24" height="16" rx="3" fill="rgba(96,165,250,0.2)" stroke="rgba(96,165,250,0.4)" stroke-width="0.8"/>
+      <line x1="126" y1="122" x2="126" y2="138" stroke="rgba(96,165,250,0.4)" stroke-width="0.8"/>
+      <text x="126" y="154" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#93c5fd" font-weight="600">Student</text>
+      <text x="126" y="167" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="rgba(139,152,164,0.8)">Group · Project · Submit</text>
+
+      <!-- student tags -->
+      <rect x="18" y="48" width="76" height="20" rx="10" fill="rgba(96,165,250,0.1)" stroke="rgba(96,165,250,0.25)" stroke-width="0.8"/>
+      <text x="56" y="62" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#93c5fd">📋 Project Idea</text>
+      <rect x="170" y="48" width="68" height="20" rx="10" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.2)" stroke-width="0.8"/>
+      <text x="204" y="62" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#93c5fd">🎯 Preference</text>
+      <rect x="28" y="194" width="72" height="20" rx="10" fill="rgba(96,165,250,0.07)" stroke="rgba(96,165,250,0.18)" stroke-width="0.8"/>
+      <text x="64" y="208" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#93c5fd">👥 Group: 4</text>
+
+      <!-- Algorithm hub -->
+      <rect x="254" y="70" width="152" height="120" rx="16" fill="rgba(10,14,26,0.92)" stroke="rgba(139,92,246,0.38)" stroke-width="1.4"/>
+      <polygon points="330,86 344,95 344,112 330,121 316,112 316,95" fill="rgba(124,58,237,0.15)" stroke="url(#gA)" stroke-width="1.3"/>
+      <text x="330" y="108" text-anchor="middle" font-family="monospace" font-size="13" fill="#a78bfa">⚙</text>
+      <text x="330" y="143" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#f0f4ff" font-weight="700">Allocation</text>
+      <text x="330" y="158" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="rgba(139,152,164,0.8)">Constraint-based matching</text>
+      <circle cx="330" cy="130" r="64" stroke="rgba(124,58,237,0.14)" stroke-width="1" fill="none" stroke-dasharray="4 3">
+        <animateTransform attributeName="transform" type="rotate" from="0 330 130" to="360 330 130" dur="22s" repeatCount="indefinite"/>
+      </circle>
+
+      <!-- Guide card -->
+      <rect x="458" y="80" width="152" height="100" rx="14" fill="rgba(13,20,36,0.85)" stroke="rgba(56,189,248,0.3)" stroke-width="1.2"/>
+      <circle cx="534" cy="105" r="12" fill="rgba(56,189,248,0.15)" stroke="url(#gB)" stroke-width="1.2"/>
+      <path d="M521 100 L534 93 L547 100 L534 107 Z" fill="#38bdf8" opacity="0.65"/>
+      <circle cx="534" cy="105" r="4" fill="#7dd3fc"/>
+      <rect x="521" y="120" width="26" height="15" rx="3" fill="rgba(56,189,248,0.2)" stroke="rgba(56,189,248,0.4)" stroke-width="0.8"/>
+      <text x="534" y="131" text-anchor="middle" font-family="monospace" font-size="8" fill="#38bdf8">ML</text>
+      <text x="534" y="152" text-anchor="middle" font-family="Inter,sans-serif" font-size="10.5" fill="#38bdf8" font-weight="600">Guide</text>
+      <text x="534" y="165" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="rgba(139,152,164,0.8)">Review · Feedback · Track</text>
+
+      <!-- guide tags -->
+      <rect x="468" y="46" width="88" height="20" rx="10" fill="rgba(56,189,248,0.1)" stroke="rgba(56,189,248,0.22)" stroke-width="0.8"/>
+      <text x="512" y="60" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#38bdf8">🔬 Domain Expert</text>
+      <rect x="472" y="194" width="82" height="20" rx="10" fill="rgba(56,189,248,0.08)" stroke="rgba(56,189,248,0.18)" stroke-width="0.8"/>
+      <text x="513" y="208" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" fill="#38bdf8">📊 Load: 3 / 5</text>
+
+      <!-- Arrows -->
+      <path d="M203 130 C228 130 238 130 252 130" stroke="rgba(139,92,246,0.5)" stroke-width="1.4" stroke-dasharray="5 3" fill="none" marker-end="url(#mA)">
+        <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="2s" repeatCount="indefinite"/>
+      </path>
+      <path d="M407 130 C424 130 434 130 456 130" stroke="rgba(56,189,248,0.5)" stroke-width="1.4" stroke-dasharray="5 3" fill="none" marker-end="url(#mB)">
+        <animate attributeName="stroke-dashoffset" from="0" to="-16" dur="2s" repeatCount="indefinite"/>
+      </path>
+
+      <!-- Matched chip -->
+      <rect x="284" y="210" width="92" height="24" rx="12" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.3)" stroke-width="0.9"/>
+      <text x="330" y="226" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#34d399" font-weight="600">✓ Matched!</text>
+
+      <!-- Admin eye -->
+      <rect x="283" y="12" width="94" height="22" rx="11" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.28)" stroke-width="0.8"/>
+      <text x="330" y="27" text-anchor="middle" font-family="Inter,sans-serif" font-size="8.5" fill="#f59e0b" font-weight="600">👁 Admin Monitor</text>
+    </svg>
+  </div>
+
+  <p class="role-label">Select your role to continue</p>
+
+  <div class="role-grid">
+
+    <!-- Student -->
+    <div class="role-card rc-student">
+      <div class="rc-icon ic-student">🎓</div>
+      <div class="rc-name cn-student">Student</div>
+      <p class="rc-desc">Register your project group, define your domain, and get matched with a guide who fits your vision.</p>
+      <div class="rc-actions">
+        <a href="{% url 'student_login' %}" class="rc-btn rb-student-solid">Sign In</a>
+        <a href="{% url 'student_register' %}" class="rc-btn rb-student-ghost">Register</a>
+      </div>
+    </div>
+
+    <!-- Guide -->
+    <div class="role-card rc-guide">
+      <span class="featured-tag">Faculty</span>
+      <div class="rc-icon ic-guide">🧑‍🏫</div>
+      <div class="rc-name cn-guide">Guide / Mentor</div>
+      <p class="rc-desc">Review assigned student groups, track milestone submissions, give feedback, and manage your mentoring load.</p>
+      <div class="rc-actions">
+        <a href="{% url 'guide_login' %}" class="rc-btn rb-guide-solid">Sign In</a>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div class="role-card rc-admin">
+      <div class="rc-icon ic-admin">🛡️</div>
+      <div class="rc-name cn-admin">Administrator</div>
+      <p class="rc-desc">Manage the guide roster, run the allocation algorithm, monitor load distribution, and oversee the system.</p>
+      <div class="rc-actions">
+        <a href="{% url 'admin:index' %}" class="rc-btn rb-admin-ghost">Admin Panel</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

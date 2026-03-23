@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — MentorMatch{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.clear-file-btn');
+  if (!btn) return;
+
+  var input = document.getElementById(btn.dataset.target);
+  if (!input) return;
+
+  // Create a fresh input keeping all original attributes
+  var fresh = document.createElement('input');
+  fresh.type  = 'file';
+  fresh.name  = input.name;
+  fresh.id    = input.id;
+  fresh.className = input.className;
+  // Copy any data-* or other attributes
+  Array.from(input.attributes).forEach(function(attr) {
+    if (!['type','name','id','class'].includes(attr.name)) {
+      fresh.setAttribute(attr.name, attr.value);
+    }
+  });
+
+  input.parentNode.replaceChild(fresh, input);
+
+  // Flash the button green briefly so user sees it worked
+  btn.textContent = '✓';
+  btn.style.color = 'var(--success)';
+  setTimeout(function() {
+    btn.textContent = '✕';
+    btn.style.color = '';
+  }, 900);
+});
+</script>
+{% endblock %}
+{% block page_title %}Student Dashboard{% endblock %}
+{% block snav_dashboard %}active{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block page_actions %}
+  {% if group and not group.is_solo and group.status != 'ASSIGNED' and group.leader == student %}
+    <a href="{% url 'manage_group' group.id %}" class="btn btn-secondary btn-sm">Manage Group</a>
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<!-- Stats row -->
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-icon">🎓</div>
+    <div class="stat-label">Name</div>
+    <div class="stat-value" style="font-size:1.1rem;line-height:1.3">{{ student.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🏛</div>
+    <div class="stat-label">Department</div>
+    <div class="stat-value" style="font-size:1.1rem">{{ student.department.code }}</div>
+    <div class="stat-sub">{{ student.department.name }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">📅</div>
+    <div class="stat-label">Admission Year</div>
+    <div class="stat-value">{{ student.year }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🪪</div>
+    <div class="stat-label">Roll ID</div>
+    <div class="stat-value" style="font-size:.95rem;font-family:monospace;letter-spacing:.04em">{{ student.display_roll }}</div>
+  </div>
+</div>
+
+{% if group %}
+
+  <div style="display:grid;grid-template-columns:1fr 300px;gap:1.25rem;align-items:start">
+
+    <!-- Left column -->
+    <div>
+
+      <!-- Project -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">{{ group.project_title }}</span>
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <span class="badge {% if group.is_solo %}badge-solo{% else %}badge-group{% endif %}">
+              {% if group.is_solo %}Solo{% else %}Group · {{ group.member_count }}{% endif %}
+            </span>
+            <span class="badge {% if group.status == 'ASSIGNED' %}badge-assigned{% else %}badge-pending{% endif %}">
+              {{ group.get_status_display }}
+            </span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:1rem">Domain: <span style="color:var(--text-secondary)">{{ group.project_domain }}</span></div>
+          {% if group.guide %}
+            <div class="section-label">Assigned Guide</div>
+            <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:.825rem">
+              <span style="font-weight:600;color:var(--text-primary)">{{ group.guide.name }}</span>
+              {% if group.guide.email %}<span style="color:var(--text-secondary)">{{ group.guide.email }}</span>{% endif %}
+              {% if group.guide.phone %}<span style="color:var(--text-secondary)">{{ group.guide.phone }}</span>{% endif %}
+            </div>
+          {% else %}
+            <div class="alert alert-warning">
+              Waiting for guide allocation.
+              {% if group.status == 'PENDING' and group.leader == student %}
+                <a href="{% url 'manage_group' group.id %}" style="color:var(--violet-light);font-weight:600;margin-left:.5rem">Manage group →</a>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Members -->
+      {% if not group.is_solo %}
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Group Members</span>
+          <span style="font-size:.72rem;color:var(--text-muted)">{{ members|length }} / 4</span>
+        </div>
+        <div class="card-body" style="padding-top:.625rem;padding-bottom:.625rem">
+          {% for m in members %}
+            <div class="member-row">
+              <div>
+                <span style="font-size:.825rem;font-weight:600;color:var(--text-primary)">{{ m.name }}</span>
+                <span style="font-family:monospace;font-size:.72rem;color:var(--text-muted);margin-left:.5rem">{{ m.display_roll }}</span>
+              </div>
+              <span class="badge {% if m == group.leader %}badge-leader{% else %}badge-solo{% endif %}">
+                {% if m == group.leader %}Leader{% else %}Member{% endif %}
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Tasks -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Tasks from Guide</span>
+          {% if todos %}<span style="font-size:.72rem;color:var(--text-muted)">{{ todos|length }} task{{ todos|length|pluralize }}</span>{% endif %}
+        </div>
+        <div class="card-body" style="padding-top:.5rem;padding-bottom:.5rem">
+          {% if todos %}
+            {% for todo in todos %}
+              <div class="todo-item {% if todo.is_done %}todo-done{% endif %}">
+                <div style="flex:1">
+                  <div class="todo-title" style="font-size:.825rem;font-weight:600;color:var(--text-primary)">{{ todo.title }}</div>
+                  {% if todo.description %}<div style="font-size:.75rem;color:var(--text-secondary);margin-top:.2rem">{{ todo.description }}</div>{% endif %}
+                  {% if todo.is_done and todo.marked_done_by %}
+                    <div style="font-size:.7rem;color:var(--success);margin-top:.2rem">✓ Done by {{ todo.marked_done_by.name }}</div>
+                  {% endif %}
+                </div>
+                <form method="post" action="{% url 'toggle_todo' group.id todo.id %}" style="margin:0;flex-shrink:0">
+                  {% csrf_token %}
+                  <button type="submit" data-no-spinner
+                          class="btn btn-xs {% if todo.is_done %}btn-ghost{% else %}btn-success{% endif %}">
+                    {% if todo.is_done %}Undo{% else %}Mark Done{% endif %}
+                  </button>
+                </form>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">No tasks yet. Your guide will add tasks after reviewing your project.</div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- Right column — Submissions -->
+    <div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Submissions</span></div>
+        <div class="card-body">
+          {% if submission %}
+            <div style="margin-bottom:1.25rem">
+              <div class="file-slot">
+                <span class="file-slot-label">Presentation</span>
+                {% if submission.presentation %}
+                  <a href="{{ submission.presentation.url }}" target="_blank" class="btn btn-xs btn-secondary" style="flex-shrink:0">Download</a>
+                {% else %}<span class="file-slot-status">Not uploaded</span>{% endif %}
+              </div>
+              <div class="file-slot">
+                <span class="file-slot-label">Report</span>
+                {% if submission.report %}
+                  <a href="{{ submission.report.url }}" target="_blank" class="btn btn-xs btn-secondary" style="flex-shrink:0">Download</a>
+                {% else %}<span class="file-slot-status">Not uploaded</span>{% endif %}
+              </div>
+              <div class="file-slot">
+                <span class="file-slot-label">Screenshot</span>
+                {% if submission.screenshot %}
+                  <a href="{{ submission.screenshot.url }}" target="_blank" class="btn btn-xs btn-secondary" style="flex-shrink:0">View</a>
+                {% else %}<span class="file-slot-status">Not uploaded</span>{% endif %}
+              </div>
+            </div>
+            <div class="divider"></div>
+          {% endif %}
+          <div class="section-label">{% if submission %}Update Files{% else %}Upload Files{% endif %}</div>
+          <form method="post" action="{% url 'upload_submission' group.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% if submission_form %}
+              {% for field in submission_form %}
+                <div class="field-group">
+                  <label class="field-label">{{ field.label }}</label>
+                  <div style="display:flex;align-items:center;gap:.4rem">
+                    <div style="flex:1;min-width:0;overflow:hidden">{{ field }}</div>
+                    <button type="button" class="btn btn-xs btn-ghost clear-file-btn" data-target="{{ field.id_for_label }}" title="Clear" style="flex-shrink:0;padding:.3rem .5rem">✕</button>
+                  </div>
+                  {% if field.help_text %}<div class="field-hint">{{ field.help_text }}</div>{% endif %}
+                  {% if field.errors %}<div class="field-error">{{ field.errors }}</div>{% endif %}
+                </div>
+              {% endfor %}
+            {% endif %}
+            <button type="submit" class="btn btn-primary btn-sm" style="width:100%;justify-content:center">Upload</button>
+          </form>
+
+        </div>
+      </div>
+    </div><!-- /right -->
+
+  </div>
+
+{% else %}
+
+  <!-- No project -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:600px">
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><span class="card-title">Start a Project</span></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:1.25rem;line-height:1.6">Create a solo project or start a group and invite teammates by roll number.</p>
+        <a href="{% url 'create_group' %}" class="btn btn-primary btn-sm">Create Project</a>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:0">
+      <div class="card-header"><span class="card-title">Join a Group</span></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:.875rem;line-height:1.6">Share your ID with your group leader:</p>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:.625rem 1rem;font-family:monospace;font-size:.875rem;color:var(--text-primary);font-weight:600;letter-spacing:.04em;margin-bottom:.75rem">{{ student.display_roll }}</div>
+        <div style="font-size:.72rem;color:var(--text-muted)">Dept: {{ student.department.code }} · Year: {{ student.year }} · Roll: {{ student.roll_number }}</div>
+      </div>
+    </div>
+  </div>
+
+{% endif %}
+
+{% endblock %}

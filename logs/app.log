@@ -1,0 +1,37 @@
+[2026-03-22 06:49:50,391] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 06:49:50,391] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 06:50:18,616] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 06:50:18,617] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 06:51:19,899] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 06:51:19,900] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 06:54:31,887] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 06:54:31,888] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 06:54:49,467] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 06:54:49,468] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 07:06:33,035] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 07:06:33,035] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 07:06:58,369] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 07:06:58,370] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 07:07:02,743] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 07:07:02,744] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 07:08:16,872] WARNING django.request — Not Found: /static/css/mentormatch.css
+[2026-03-22 07:08:16,873] WARNING django.server — "GET /static/css/mentormatch.css HTTP/1.1" 404 179
+[2026-03-22 07:08:16,886] WARNING django.request — Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-03-22 07:08:16,886] WARNING django.server — "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 179
+[2026-03-22 07:15:13,625] WARNING django.request — Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-03-22 07:15:13,627] WARNING django.server — "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 10359
+[2026-03-22 07:15:17,469] WARNING django.request — Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-03-22 07:15:17,470] WARNING django.server — "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 10359
+[2026-03-22 07:20:57,160] WARNING django.request — Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-03-22 07:20:57,161] WARNING django.server — "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 10359
+[2026-03-22 07:39:48,968] WARNING django.security.SuspiciousSession — Session data corrupted
+[2026-03-22 07:39:52,528] WARNING django.security.SuspiciousSession — Session data corrupted
+[2026-03-22 07:40:02,422] WARNING django.security.SuspiciousSession — Session data corrupted
+[2026-03-22 20:10:53,337] WARNING django.request — Not Found: /favicon.ico
+[2026-03-22 20:10:53,339] WARNING django.server — "GET /favicon.ico HTTP/1.1" 404 10248
+[2026-03-22 21:00:50,236] WARNING django.request — Not Found: /favicon.ico
+[2026-03-22 21:00:50,237] WARNING django.server — "GET /favicon.ico HTTP/1.1" 404 10248
+[2026-03-23 12:21:08,353] WARNING django.request — Not Found: /favicon.ico
+[2026-03-23 12:21:08,355] WARNING django.server — "GET /favicon.ico HTTP/1.1" 404 10248
+[2026-03-23 12:40:58,807] WARNING django.request — Not Found: /favicon.ico
+[2026-03-23 12:40:58,808] WARNING django.server — "GET /favicon.ico HTTP/1.1" 404 10248

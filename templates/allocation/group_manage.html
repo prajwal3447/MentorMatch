@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Manage Group — MentorMatch{% endblock %}
+{% block page_title %}Manage Group{% endblock %}
+{% block snav_project %}active{% endblock %}
+{% block nav_project %}active{% endblock %}
+
+{% block page_actions %}
+  <a href="{% url 'student_dashboard' %}" class="btn btn-ghost btn-sm">← Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:640px">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">{{ group.project_title }}</span>
+      <div style="display:flex;gap:.4rem">
+        <span class="badge {% if group.is_solo %}badge-solo{% else %}badge-group{% endif %}">{% if group.is_solo %}Solo{% else %}Group{% endif %}</span>
+        <span class="badge {% if group.status == 'ASSIGNED' %}badge-assigned{% else %}badge-pending{% endif %}">{{ group.get_status_display }}</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:.75rem 1.25rem;font-size:.8rem;color:var(--text-secondary)">
+      {{ group.project_domain }} · {{ group.department }}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Members</span>
+      <span style="font-size:.72rem;color:var(--text-muted)">{{ members.count }} / 4</span>
+    </div>
+    <div class="card-body" style="padding-top:.5rem;padding-bottom:.5rem">
+      {% for m in members %}
+        <div class="member-row">
+          <div>
+            <span style="font-size:.825rem;font-weight:600;color:var(--text-primary)">{{ m.student.name }}</span>
+            <span style="font-family:monospace;font-size:.72rem;color:var(--text-muted);margin-left:.5rem">{{ m.student.display_roll }}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="badge {% if m.role == 'LEADER' %}badge-leader{% else %}badge-solo{% endif %}">{{ m.role }}</span>
+            {% if is_leader and m.role != 'LEADER' and group.status != 'ASSIGNED' %}
+              <form method="post" action="{% url 'remove_member' group.id m.student.id %}" style="margin:0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-xs" data-no-spinner
+                        onclick="return confirm('Remove {{ m.student.name }}?')">Remove</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if is_leader and members.count < 4 and group.status != 'ASSIGNED' and not group.is_solo %}
+      <div style="padding:1rem 1.25rem;border-top:1px solid var(--border-light);background:var(--surface-2)">
+        <div class="section-label" style="margin-bottom:.625rem">Add Teammate</div>
+        <p style="font-size:.75rem;color:var(--text-secondary);margin-bottom:.75rem">Only students from <strong style="color:var(--text-primary)">{{ group.department }}</strong> can join this group.</p>
+        <form method="post" action="{% url 'add_member' group.id %}">
+          {% csrf_token %}
+          <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:.5rem;align-items:end">
+            <div>
+              <label class="field-label">Department</label>
+              {{ add_member_form.department }}
+            </div>
+            <div>
+              <label class="field-label">Year</label>
+              {{ add_member_form.year }}
+            </div>
+            <div>
+              <label class="field-label">Roll No.</label>
+              {{ add_member_form.roll_number }}
+            </div>
+            <button type="submit" class="btn btn-success btn-sm" style="align-self:end">Add</button>
+          </div>
+        </form>
+      </div>
+    {% elif members.count >= 4 %}
+      <div style="padding:.75rem 1.25rem;border-top:1px solid var(--border-light);font-size:.78rem;color:var(--text-muted)">Group is full (4/4 members).</div>
+    {% endif %}
+  </div>
+
+  {% if is_leader and group.status != 'ASSIGNED' %}
+    <div class="card card-glow">
+      <div class="card-header"><span class="card-title">Submit for Allocation</span></div>
+      <div class="card-body">
+        <p style="font-size:.8rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6">
+          {% if group.is_solo %}Your solo project will be matched immediately.
+          {% else %}Min 2 members required. Current: <strong style="color:var(--text-primary)">{{ members.count }}</strong> member{{ members.count|pluralize }}.{% endif %}
+        </p>
+        <form method="post" action="{% url 'submit_group' group.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary" onclick="return confirm('Submit for guide allocation?')">Submit for Allocation</button>
+        </form>
+      </div>
+    </div>
+  {% elif group.status == 'ASSIGNED' %}
+    <div class="alert alert-success" style="display:flex;align-items:center;gap:.875rem">
+      <span style="font-size:1.2rem">✓</span>
+      <div>
+        <div style="font-weight:600">Guide Assigned</div>
+        <div style="font-size:.78rem;margin-top:.15rem;opacity:.9">{{ group.guide.name }}{% if group.guide.email %} · {{ group.guide.email }}{% endif %}</div>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

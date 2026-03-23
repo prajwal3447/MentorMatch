@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile — MentorMatch{% endblock %}
+{% block page_title %}Edit Profile{% endblock %}
+{% block gnav_profile %}active{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block page_actions %}
+  <a href="{% url 'guide_dashboard' %}" class="btn btn-ghost btn-sm">← Dashboard</a>
+{% endblock %}
+
+{% block content %}
+<div style="max-width:480px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">Profile Details</span></div>
+    <div class="card-body">
+      {% if form.non_field_errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="field-group">
+          <label class="field-label">Full Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="name" class="input" value="{{ form.name.value|default:'' }}" required>
+          {% if form.name.errors %}<div class="field-error">{{ form.name.errors }}</div>{% endif %}
+        </div>
+        <div class="field-group">
+          <label class="field-label">Department <span style="color:var(--danger)">*</span></label>
+          <select name="department" class="select" required>
+            <option value="">Select department</option>
+            {% for dept in form.department.field.queryset %}
+              <option value="{{ dept.id }}" {% if form.department.value == dept.id|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+          </select>
+          {% if form.department.errors %}<div class="field-error">{{ form.department.errors }}</div>{% endif %}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.875rem">
+          <div class="field-group">
+            <label class="field-label">Email</label>
+            <input type="email" name="email" class="input" value="{{ form.email.value|default:'' }}">
+            {% if form.email.errors %}<div class="field-error">{{ form.email.errors }}</div>{% endif %}
+          </div>
+          <div class="field-group">
+            <label class="field-label">Phone</label>
+            <input type="text" name="phone" class="input" value="{{ form.phone.value|default:'' }}">
+            {% if form.phone.errors %}<div class="field-error">{{ form.phone.errors }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Specializations <span style="color:var(--danger)">*</span></label>
+          <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem;margin-top:.35rem">
+            {% for checkbox in form.specializations %}
+              <label style="display:flex;align-items:center;gap:.55rem;padding:.25rem 0;cursor:pointer;font-size:.825rem;color:var(--text-secondary)">
+                {{ checkbox.tag }} {{ checkbox.choice_label }}
+              </label>
+            {% endfor %}
+          </div>
+          {% if form.specializations.errors %}<div class="field-error">{{ form.specializations.errors }}</div>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Save Changes</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

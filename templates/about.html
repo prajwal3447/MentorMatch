@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}About — MentorMatch{% endblock %}
+{% block page_title %}About{% endblock %}
+{% block gnav_about %}active{% endblock %}
+{% block nav_about %}active{% endblock %}
+{% block nav_about_g %}active{% endblock %}
+
+{% block content %}
+<div style="max-width:520px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">MentorMatch</span></div>
+    <div class="card-body" style="font-size:.875rem;color:var(--text-secondary);line-height:1.7">
+      <p>MentorMatch is a project guide allocation system for NMIET. It automatically matches student project groups with suitable guides based on domain expertise and availability.</p>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.625rem">
+        {% for feature in features %}
+          <div style="font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:.4rem">
+            <span style="color:var(--violet-light);font-size:.6rem">◆</span>{{ feature }}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="divider"></div>
+      <p style="font-size:.78rem;color:var(--text-muted)">Developed by Prajwal Shinde · NMIET · 2026</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block auth_content %}
+<div style="max-width:520px;width:100%">
+  <div class="card">
+    <div class="card-header"><span class="card-title">MentorMatch</span></div>
+    <div class="card-body" style="font-size:.875rem;color:var(--text-secondary);line-height:1.7">
+      <p>MentorMatch is a project guide allocation system for NMIET. It automatically matches student project groups with suitable guides based on domain expertise and availability.</p>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.625rem">
+        {% for feature in features %}
+          <div style="font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:.4rem">
+            <span style="color:var(--violet-light);font-size:.6rem">◆</span>{{ feature }}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="divider"></div>
+      <p style="font-size:.78rem;color:var(--text-muted)">Developed by Prajwal Shinde · NMIET · 2026</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

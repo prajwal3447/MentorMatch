@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<h2 class="text-center mb-5">Project Guide Allocation Portal</h2>
+
+<div class="row text-center">
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-lg h-100">
+            <div class="card-body">
+                <h4 class="card-title">Student Portal</h4>
+                <p class="card-text">
+                    Students can submit project topics and request guides.
+                </p>
+                <a href="{% url 'student_login' %}" class="btn btn-primary">Student Login</a>
+                <a href="{% url 'student_register' %}" class="btn btn-primary">Student Register</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-lg h-100">
+            <div class="card-body">
+                <h4 class="card-title">Guide Portal</h4>
+                <p class="card-text">
+                    Guides can review student project requests and approve them.
+                </p>
+                <a href="{% url 'guide_login' %}" class="btn btn-success">Guide Login</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-lg h-100">
+            <div class="card-body">
+                <h4 class="card-title">Admin Portal</h4>
+                <p class="card-text">
+                    Admin can manage departments, guides, and project allocations.
+                </p>
+                <a href="/admin" class="btn btn-dark">Admin Panel</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Create Project — MentorMatch{% endblock %}
+{% block page_title %}Create Project{% endblock %}
+{% block snav_project %}active{% endblock %}
+{% block nav_project %}active{% endblock %}
+
+{% block content %}
+<div style="max-width:480px">
+  <div class="card">
+    <div class="card-header"><span class="card-title">New Project</span></div>
+    <div class="card-body">
+      {% if form.errors %}
+        <div class="alert alert-error" style="margin-bottom:1rem">{{ form.errors }}</div>
+      {% endif %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="field-group">
+          <label class="field-label">Project Title <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="project_title" class="input"
+                 value="{{ form.project_title.value|default:'' }}"
+                 placeholder="e.g. Smart Attendance System" required autofocus>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Domain <span style="color:var(--danger)">*</span></label>
+          <select name="project_domain" class="select" required>
+            <option value="">Select domain</option>
+            {% for domain in form.project_domain.field.queryset %}
+              <option value="{{ domain.id }}" {% if form.project_domain.value == domain.id|stringformat:"s" %}selected{% endif %}>{{ domain.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:.875rem;margin-bottom:1.25rem">
+          <label style="display:flex;align-items:flex-start;gap:.625rem;cursor:pointer">
+            <input type="checkbox" name="is_solo" {% if form.is_solo.value %}checked{% endif %} style="margin-top:.15rem">
+            <div>
+              <div style="font-size:.825rem;font-weight:600;color:var(--text-primary)">Solo project</div>
+              <div style="font-size:.75rem;color:var(--text-secondary);margin-top:.15rem">Check if working alone. Uncheck to add teammates next.</div>
+            </div>
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Create Project</button>
+      </form>
+    </div>
+  </div>
+  <p style="font-size:.75rem;color:var(--text-muted);margin-top:.75rem;text-align:center">
+    <a href="{% url 'student_dashboard' %}" style="color:var(--text-secondary)">← Back to dashboard</a>
+  </p>
+</div>
+{% endblock %}
